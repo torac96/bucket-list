@@ -75,7 +75,7 @@ const App = () => {
   return (
     <main className="w-screen h-screen bg-[#f5f5f5] text-[#4d4d4d] font-light">
       <section className="flex justify-center flex-col m-auto min-w-[230px] max-w-[550px] text-center">
-        <h1 className="text-[100px] font-medium text-[#af2f2f26]">todos</h1>
+        <h1 className="text-[100px] font-medium text-[#af2f2f26]">Bucket list</h1>
 
         <input
           value={todoText}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Todos {
   id: number;
@@ -32,6 +32,30 @@ const App = () => {
   const [todoText, setTodoText] = useState("");
   const [state, setState] = useState<State>(defaultStates[0]);
 
+  
+
+  useEffect(() => {
+    try {
+      if(localStorage.getItem("todos") != null && Array.isArray(JSON.parse(localStorage.getItem("todos")!)) && JSON.parse(localStorage.getItem("todos")!).length > 0 ) {
+        const savedTodos: Todos[] = JSON.parse(localStorage.getItem("todos")!)
+        if(!("id" in savedTodos[0] && "title" in savedTodos[0] && "completed" in savedTodos[0] && "editable" in savedTodos[0]) ) {
+          throw "localStorage doesn't contailn instances of Todos";
+        }
+        setTodos(savedTodos)
+      }
+    } catch(e) {
+        console.error(e);
+      }
+  }, []);
+  
+ 
+
+  useEffect(() => {
+    console.log("useEffect");
+    
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
   function toggle(todo: Todos) {
     const newState = todos.map((obj) => {
       if (obj.id === todo.id) return { ...obj, completed: !todo.completed };
@@ -58,14 +82,39 @@ const App = () => {
     }
   }
 
+  function onKeyUpSaveEdit(todo: Todos, event: any) {
+    console.log("onKeyUpSaveEdit", event, todo);
+    if (event.keyCode === 13) {
+      const newState = todos.map((obj) => {
+        if (obj.id === todo.id) return { ...obj, editable: false};
+        return obj;
+      });
+  
+      setTodos(newState);
+    }
+  }
+
   function clearCompleted() {
     const newState = [...todos.filter(todo => todo.completed === false)]
     setTodos(newState);
   }
 
   function setEditable(todo: Todos, enable: boolean = true) {
+    console.log("setEditable", todo, enable);
+    
     const newState = todos.map((obj) => {
       if (obj.id === todo.id) return { ...obj, editable: enable};
+      return obj;
+    });
+
+    setTodos(newState);
+  }
+
+  function updateTodo(todo: Todos, newTitle: string) {
+    console.log("updateTodo", todo, newTitle);
+    
+    const newState = todos.map((obj) => {
+      if (obj.id === todo.id) return { ...obj, title: newTitle};
       return obj;
     });
 
@@ -101,24 +150,22 @@ const App = () => {
                     checked={todo.completed}
                     onChange={() => toggle(todo)}
                   />
-                  <label
-                    onDoubleClick={() => setEditable(todo)}
+                  {!todo.editable && (<label
+                    onDoubleClick={() => setEditable(todo, true)}
                     className={
                       todo.completed ? "line-through text-[#4d4d4d27]" : ""
                     }
                   >
                     {todo.title}
-                  </label>
+                  </label>)}
 
-                     {/* <input
+                  {todo.editable && (<input
                      value={todo.title}
-                     onChange={(event) => setTodoText(event.target.value)}
+                     onChange={(event) => updateTodo(todo, event.target.value)}
                      type="text"
-                     className="p-4 pl-14 border-0 bg-white font-normal shadow-xl placeholder:italic   placeholder:font-medium  text-2xl outline-none placeholder:text-[#4d4d4d27]"
-                     placeholder="What needs to be done?"
-                     onKeyUp={(event) => onKeyUp(event)}
-                   /> */}
-                  
+                     className="p-2 border-0 bg-white font-normal shadow-xl placeholder:italic   placeholder:font-medium  text-2xl outline-none placeholder:text-[#4d4d4d27]"
+                     onKeyUp={(event) => onKeyUpSaveEdit(todo, event)}
+                   />)}
                  
                 </li>
               ))}

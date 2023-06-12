@@ -210,7 +210,7 @@ const App = () => {
         </ul>
 
         {todos.length > 0 && (
-          <footer className="flex border-t border-[#e6e6e6] items-center border-0 bg-white px-4 py-2 shadow-xl justify-between">
+          <footer className="justify-between flex border-t border-[#e6e6e6] items-center border-0 bg-white px-4 py-2 shadow-xl ">
             <span className=" flex justify-start">{todos.filter(todo => todo.completed === false)?.length} items left</span>
 
             <ul className="flex ">

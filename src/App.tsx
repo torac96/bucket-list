@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { IoMdClose } from 'react-icons/io';
 
 interface Todos {
   id: number;
@@ -32,8 +33,6 @@ const App = () => {
   const [todoText, setTodoText] = useState("");
   const [state, setState] = useState<State>(defaultStates[0]);
 
-  
-
   useEffect(() => {
     try {
       if(localStorage.getItem("todos") != null && Array.isArray(JSON.parse(localStorage.getItem("todos")!)) && JSON.parse(localStorage.getItem("todos")!).length > 0 ) {
@@ -47,12 +46,8 @@ const App = () => {
         console.error(e);
       }
   }, []);
-  
- 
 
   useEffect(() => {
-    console.log("useEffect");
-    
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
@@ -103,7 +98,7 @@ const App = () => {
     console.log("setEditable", todo, enable);
     
     const newState = todos.map((obj) => {
-      if (obj.id === todo.id) return { ...obj, editable: enable};
+      if (obj.id === todo.id && todo.completed == false) return { ...obj, editable: enable};
       return obj;
     });
 
@@ -120,6 +115,45 @@ const App = () => {
 
     setTodos(newState);
   }
+
+  // const [waitingClick, setWaitingClick] = useState(null);
+  // const [lastClick, setLastClick] = useState(0);
+  // const processClick = (e) => {
+  //   if (lastClick && e.timeStamp - lastClick < 250 && waitingClick) {
+  //     setLastClick(0);
+  //     clearTimeout(waitingClick);
+  //     setWaitingClick(null);
+  //     console.log('double click')}
+  //     else{
+  //       setLastClick(e.timeStamp);
+  //       setWaitingClick(setTimeout(() => { setWaitingClick(null);}, 251))
+  //       console.log('single click')
+        
+  //     }
+  //   }
+
+  // let watingClick = null; // a reference to timeout function
+  // let lastClick = 0; // a watchdog for difference between 2 clicks
+
+  // function handleClick(e) {
+  //   if (
+  //     lastClick &&
+  //     e.timeStamp - lastClick < 250 &&
+  //     watingClick
+  //   ) {
+  //     lastClick = 0;
+  //     clearTimeout(watingClick);
+  //     console.log("Do the steps to respond double click");
+  //     watingClick = null;
+  //   } else {
+  //     lastClick = e.timeStamp;
+  //     watingClick = setTimeout(() => {
+  //       watingClick = null;
+  //       console.log("Do the steps to respond single click");
+  //     }, 251);
+  //   }
+  // }
+  // }
 
   return (
     <main className="w-screen h-screen bg-[#f5f5f5] text-[#4d4d4d] font-light">
@@ -142,40 +176,44 @@ const App = () => {
               .map((todo) => (
                 <li
                   key={todo.id}
-                  className="flex align-middle relative p-4 pl-14 border-0 bg-white font-normal  text-2xl outline-none "
+                  className="flex align-middle relative p-4 pl-14 border-0 bg-white font-normal  text-2xl outline-none items-center"
                 >
                   <input
-                    className="absolute left-4 h-10 w-7 "
+                    className="absolute left-4 h-9 w-7 "
                     type="checkbox"
                     checked={todo.completed}
                     onChange={() => toggle(todo)}
                   />
                   {!todo.editable && (<label
                     onDoubleClick={() => setEditable(todo, true)}
-                    className={
-                      todo.completed ? "line-through text-[#4d4d4d27]" : ""
+                    className={`${todo.completed ? "line-through text-[#4d4d4d27]" : ""} flex w-full`
+                      
                     }
                   >
                     {todo.title}
                   </label>)}
 
-                  {todo.editable && (<input
+                  {todo.editable && (
+                  <div className="flex items-center">
+                    <input
                      value={todo.title}
                      onChange={(event) => updateTodo(todo, event.target.value)}
                      type="text"
-                     className="p-2 border-0 bg-white font-normal shadow-xl placeholder:italic   placeholder:font-medium  text-2xl outline-none placeholder:text-[#4d4d4d27]"
+                     className="p-1 border-0 bg-white font-normal shadow-xl placeholder:italic placeholder:font-medium text-2xl outline-none placeholder:text-[#4d4d4d27]"
                      onKeyUp={(event) => onKeyUpSaveEdit(todo, event)}
-                   />)}
+                    />
+                    <IoMdClose className="relative right-8 hover:cursor-pointer" onClick={() => setEditable(todo, false)}/>
+                  </div>)}
                  
                 </li>
               ))}
         </ul>
 
         {todos.length > 0 && (
-          <footer className="flex border-t border-[#e6e6e6] items-center border-0 bg-white px-4 py-2 shadow-xl">
-            <span className="w-1/3 flex justify-start">{todos.filter(todo => todo.completed === false)?.length} items left</span>
+          <footer className="flex border-t border-[#e6e6e6] items-center border-0 bg-white px-4 py-2 shadow-xl justify-between">
+            <span className=" flex justify-start">{todos.filter(todo => todo.completed === false)?.length} items left</span>
 
-            <ul className="flex w-1/3">
+            <ul className="flex ">
               {defaultStates &&
                 defaultStates.map((defState) => (
                   <li 
@@ -189,7 +227,7 @@ const App = () => {
             </ul>
 
             {todos?.filter(todo => todo.completed === true)?.length > 0 && (
-              <button onClick={() => clearCompleted()} className="hover:underline w-1/3 flex justify-end">Clear completed</button>
+              <button onClick={() => clearCompleted()} className="hover:underline flex justify-end">Clear completed</button>
             ) }
             
           </footer>
